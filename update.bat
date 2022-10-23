@@ -20,5 +20,5 @@ dotnet restore "%cd%" --nologo
 dotnet   clean "%cd%" --configuration Release --nologo
 dotnet   build "%cd%" --configuration Release --no-restore --no-incremental
 
-"%BASE2%Carbon.HookValidator\bin\Release\Carbon.HookValidator.exe"
+"%BASE2%Carbon.HookValidator\bin\Release\Carbon.HookValidator.exe" -f "%BASE2%"
 cd ..
