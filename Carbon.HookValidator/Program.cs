@@ -10,9 +10,9 @@ namespace Carbon.HookValidator
     {
         static void Main ( string [] args )
         {
-            var path = CommandLineEx.GetArgumentResult ( "-f", AppDomain.CurrentDomain.BaseDirectory );
+            var path = CommandLineEx.GetArgumentResult ( args, "-f" );
             var exporter = new HookExporter ();
-            exporter.Init ( Path.Combine ( path, ".hooks" ), typeof ( BasePlayer ).Assembly.Location );
+            exporter.Init ( Path.Combine ( path, ".hooks" ) );
 
             using ( var body = new StringBody () )
             {

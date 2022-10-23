@@ -21,8 +21,7 @@ namespace Carbon.Developers
 
         internal List<Hook> _hooks { get; } = new List<Hook> ();
 
-        internal string _assemblyCSharpFile;
-        internal CSharpDecompiler _decompiler { get; set; }
+        internal Dictionary<string, CSharpDecompiler> _decompilers { get; } = new Dictionary<string, CSharpDecompiler> ();
         internal void _carbonInit ()
         {
             var community = typeof ( Community ).Assembly;
@@ -43,7 +42,7 @@ namespace Carbon.Developers
         }
         internal string _getSource ( Hook.Patch patch )
         {
-            var method = GetMethod ( TypeToDefinition ( patch.Type, _assemblyCSharpFile ), patch.Method );
+            var method = GetMethod ( TypeToDefinition ( patch.Type, patch.Type.Assembly.Location ), patch.Method );
             if ( method == null )
             {
                 Console.WriteLine ( $" {patch.Type.FullName}.{patch.Method} failed" );
@@ -51,13 +50,17 @@ namespace Carbon.Developers
             }
             var handle = ( System.Reflection.Metadata.MethodDefinitionHandle )MetadataTokens.EntityHandle ( method.MetadataToken.ToInt32 () );
 
-            return _decompiler.DecompileAsString ( handle );
+            if ( !_decompilers.TryGetValue ( patch.Type.Assembly.Location, out var decompiler ) )
+            {
+                _decompilers.Add ( patch.Type.Assembly.Location, decompiler = new CSharpDecompiler ( patch.Type.Assembly.Location, new ICSharpCode.Decompiler.DecompilerSettings () ) );
+            }
+
+            return decompiler.DecompileAsString ( handle );
         }
 
-        public void Init ( string cacheFile, string assemblyCsharpFile )
+        public void Init ( string cacheFile )
         {
             _carbonInit ();
-            _decompiler = new CSharpDecompiler ( _assemblyCSharpFile = assemblyCsharpFile, new ICSharpCode.Decompiler.DecompilerSettings () );
 
             CacheFile = cacheFile;
 
@@ -73,6 +76,8 @@ namespace Carbon.Developers
             {
                 var patch = hook.Type.GetCustomAttribute<Hook.Patch> ();
                 if ( patch == null ) continue;
+
+
 
                 var identifier = _getIdentifier ( hook );
                 var source = _getSource ( patch );
