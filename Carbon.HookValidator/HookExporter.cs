@@ -16,7 +16,7 @@ namespace Carbon.Developers
 {
     public class HookExporter
     {
-        public HookCache CurrentCache { get; private set; }
+        public HookCache CurrentCache { get; internal set; }
         public string CacheFile { get; private set; }
 
         internal List<Hook> _hooks { get; } = new List<Hook> ();
@@ -52,7 +52,7 @@ namespace Carbon.Developers
 
             if ( !_decompilers.TryGetValue ( patch.Type.Assembly.Location, out var decompiler ) )
             {
-                _decompilers.Add ( patch.Type.Assembly.Location, decompiler = new CSharpDecompiler ( patch.Type.Assembly.Location, new ICSharpCode.Decompiler.DecompilerSettings () ) );
+                _decompilers.Add ( patch.Type.Assembly.Location, decompiler = new CSharpDecompiler ( patch.Type.Assembly.Location, new ICSharpCode.Decompiler.DecompilerSettings()) );
             }
 
             return decompiler.DecompileAsString ( handle );
@@ -76,8 +76,6 @@ namespace Carbon.Developers
             {
                 var patch = hook.Type.GetCustomAttribute<Hook.Patch> ();
                 if ( patch == null ) continue;
-
-
 
                 var identifier = _getIdentifier ( hook );
                 var source = _getSource ( patch );
@@ -110,9 +108,9 @@ namespace Carbon.Developers
 
         #region Helpers 
 
-        internal Dictionary<string, ModuleDefinition> _modules { get; } = new Dictionary<string, ModuleDefinition> ();
+        internal static Dictionary<string, ModuleDefinition> _modules { get; } = new Dictionary<string, ModuleDefinition> ();
 
-        internal TypeDefinition TypeToDefinition ( Type type, string assemblyFile )
+        internal static TypeDefinition TypeToDefinition ( Type type, string assemblyFile )
         {
             if ( !_modules.TryGetValue ( assemblyFile, out var module ) )
             {
@@ -121,7 +119,7 @@ namespace Carbon.Developers
 
             return ( TypeDefinition )module.LookupToken ( type.MetadataToken );
         }
-        internal MethodDefinition GetMethod ( TypeDefinition self, string method )
+        internal static MethodDefinition GetMethod ( TypeDefinition self, string method )
         {
             try { return self.Methods.Where ( m => m.Name == method ).First (); } catch { return null; }
         }

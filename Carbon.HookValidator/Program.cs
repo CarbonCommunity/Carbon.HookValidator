@@ -3,6 +3,7 @@ using Carbon.Developers;
 using Carbon.Extensions;
 using System;
 using System.IO;
+using System.Threading;
 
 namespace Carbon.HookValidator
 {
@@ -10,7 +11,7 @@ namespace Carbon.HookValidator
     {
         static void Main ( string [] args )
         {
-            var path = CommandLineEx.GetArgumentResult ( args, "-f" );
+            var path = CommandLineEx.GetArgumentResult ( "-f", AppDomain.CurrentDomain.BaseDirectory );
             var exporter = new HookExporter ();
             exporter.Init ( Path.Combine ( path, ".hooks" ) );
 
@@ -35,6 +36,10 @@ namespace Carbon.HookValidator
 
                 OsEx.File.Create ( Path.Combine ( path, ".hooks.report.txt" ), body.ToNewLine () );
             }
+
+            new HookGenerator ().Init ();
+
+            Thread.Sleep ( 3000 );
         }
 
         static string Log ( object message )
@@ -43,3 +48,5 @@ namespace Carbon.HookValidator
         }
     }
 }
+
+
